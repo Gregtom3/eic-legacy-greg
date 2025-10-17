@@ -3,3 +3,9 @@ eic-shell/
 
 # Ignore submodule directories
 submodules/
+
+# Ignore Python virtual environments
+*.venv/
+.eicQuickSim/*
+
+eicQuickSim/

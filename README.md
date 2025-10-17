@@ -29,9 +29,12 @@ make all
 ```
 
 The `make all` command will:
-1. Set up the `eic-shell` environment.
-2. Build the `tmd-eic-ana` and `eicQuickSim` submodules.
-3. Build the `epic-analysis` submodule within the `eic-shell` environment.
+1. Set up the `eic-shell` environment (if the script is available).
+2. Build the `tmd-eic-ana` submodule.
+3. Create a Python virtual environment for `eicQuickSim`, install its dependencies, and build it within the `eic-shell`.
+4. Build the `epic-analysis` submodule within the `eic-shell` environment.
+
+**Note:** If the `eic-shell` script cannot be downloaded automatically, you can manually download it from the [eic-shell repository](https://github.com/eic/eic-shell) and place it in the `eic-shell` directory.
 
 To clean up the `eic-shell` directory, you can run:
 
