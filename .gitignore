@@ -1,0 +1,5 @@
+# Ignore the eic-shell directory
+eic-shell/
+
+# Ignore submodule directories
+submodules/
