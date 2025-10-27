@@ -23,7 +23,7 @@ git submodule update --init --recursive
 To update all submodules to their latest remote changes, run:
 
 ```bash
-make update-submodules
+make update
 ```
 
 ### Building the Project

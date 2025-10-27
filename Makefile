@@ -3,7 +3,7 @@
 EIC_SHELL_DIR := eic-shell
 EIC_SHELL_INSTALL_SCRIPT := https://github.com/eic/eic-shell/raw/main/install.sh
 
-.PHONY: all eic-shell clean-eic-shell build-submodules setup-submodules clean-submodules clean update-submodules
+.PHONY: all eic-shell clean-eic-shell build-submodules setup-submodules clean-submodules clean update
 
 all: build-submodules
 
@@ -37,7 +37,7 @@ clean-eic-shell:
 
 clean: clean-submodules
 
-update-submodules:
+update:
 	@echo "Updating all submodules to the latest remote changes..."
 	@git submodule sync
 	@git submodule update --remote --merge
