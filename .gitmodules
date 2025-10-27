@@ -1,9 +1,6 @@
 [submodule "submodules/tmd-eic-ana"]
 	path = submodules/tmd-eic-ana
 	url = https://github.com/Gregtom3/tmd-eic-ana
-[submodule "submodules/eicQuickSim"]
-	path = submodules/eicQuickSim
-	url = https://github.com/Gregtom3/eicQuickSim
 [submodule "submodules/epic-analysis"]
 	path = submodules/epic-analysis
 	url = https://github.com/eic/epic-analysis
