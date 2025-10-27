@@ -21,22 +21,34 @@ git submodule update --init --recursive
 ```
 
 ### Building the Project
-This repository includes a `Makefile` to simplify the setup and build process. To set up the environment and build all submodules, run:
+This repository includes a `Makefile` to simplify the setup and build process. If you do not already have it setup, you can install the latest version of `eic-shell` with:
+
+```bash
+make eic-shell
+```
+
+You can then enter into the `eic-shell` with the following command:
+
+```bash
+./eic-shell/eic-shell
+```
+
+To set up the environment and build all submodules, you must first be inside the `eic-shell`. Then, simply run:
 
 ```bash
 make all
 ```
-
-The `make all` command will:
-1. Set up the `eic-shell` environment.
-2. Build the `tmd-eic-ana` submodule.
-3. Build the remaining submodules (`tmd-eic-ana` and `epic-analysis`) within the `eic-shell`.
-4. Build the `epic-analysis` submodule within the `eic-shell` environment.
 
 **Note:** If the `eic-shell` script cannot be downloaded automatically, you can manually download it from the [eic-shell repository](https://github.com/eic/eic-shell) and place it in the `eic-shell` directory.
 
 To clean up the `eic-shell` directory, you can run:
 
 ```bash
-make clean
+make clean-eic-shell
+```
+
+To clean up the submodules, you can run:
+
+```bash
+make clean-submodules
 ```

@@ -3,11 +3,11 @@
 EIC_SHELL_DIR := eic-shell
 EIC_SHELL_INSTALL_SCRIPT := https://github.com/eic/eic-shell/raw/main/install.sh
 
-.PHONY: all setup clean build-submodules setup-submodules
+.PHONY: all eic-shell clean-eic-shell build-submodules setup-submodules clean-submodules clean
 
-all: setup build-submodules
+all: build-submodules
 
-setup:
+eic-shell:
 	@echo "Setting up eic-shell..."
 	@mkdir -p $(EIC_SHELL_DIR)
 	@cd $(EIC_SHELL_DIR) && curl -L $(EIC_SHELL_INSTALL_SCRIPT) | bash
@@ -24,7 +24,16 @@ build-submodules: setup-submodules
 	@bash -c "cd submodules/tmd-eic-ana && make"
 	@echo "Selected submodules built successfully."
 
-clean:
+clean-submodules:
+	@echo "Cleaning submodules..."
+	@bash -c "cd submodules/epic-analysis && source environ.sh && make clean || true"
+	@bash -c "cd submodules/tmd-eic-ana && make clean || true"
+	@echo "Submodule cleanup complete."
+
+clean-eic-shell:
 	@echo "Cleaning up eic-shell directory..."
 	@rm -rf $(EIC_SHELL_DIR)
 	@echo "Cleanup complete."
+
+clean: clean-submodules clean-eic-shell
+	@echo "All cleanups complete."
