@@ -20,6 +20,12 @@ If you have already cloned the repository and want to initialize the submodules,
 git submodule update --init --recursive
 ```
 
+To update all submodules to their latest remote changes, run:
+
+```bash
+make update-submodules
+```
+
 ### Building the Project
 This repository includes a `Makefile` to simplify the setup and build process. If you do not already have it setup, you can install the latest version of `eic-shell` with:
 
