@@ -1,9 +1,9 @@
 project_name: "BeAGLE.eHe3_pipluspiminus"
 campaigns: ["epic.25.08.0"]
 detectors: ["epic_craterlake"]
-energies: [["10x166"]]
+energies: ["10x166"]
 is_beagle: true
-nfiles: 500000
-nroot_files_per_job: 40
-path_to_analysis_macro: "submodules/epic-analysis/macro/analysis_dihadron.C"
-path_to_eic_shell: "eic-shell/eic-shell"
+nfiles: 50
+nroot_files_per_job: 4
+path_to_analysis_macro: "macro/analysis_dihadron.C"
+path_to_eic_shell: "../../eic-shell/eic-shell"
