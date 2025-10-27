@@ -2,10 +2,5 @@
 eic-shell/
 
 # Ignore submodule directories
-submodules/
-
-# Ignore Python virtual environments
-*.venv/
-.eicQuickSim/*
-
-eicQuickSim/
+submodules/epic-analysis/
+submodules/tmd-eic-ana/
