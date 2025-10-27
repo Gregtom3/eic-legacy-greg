@@ -56,5 +56,5 @@ make clean-eic-shell
 To clean up the submodules, you can run:
 
 ```bash
-make clean-submodules
+make clean
 ```

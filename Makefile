@@ -35,8 +35,7 @@ clean-eic-shell:
 	@rm -rf $(EIC_SHELL_DIR)
 	@echo "Cleanup complete."
 
-clean: clean-submodules clean-eic-shell
-	@echo "All cleanups complete."
+clean: clean-submodules
 
 update-submodules:
 	@echo "Updating all submodules to the latest remote changes..."
