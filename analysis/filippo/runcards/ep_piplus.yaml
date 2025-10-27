@@ -6,4 +6,4 @@ is_beagle: false
 nfiles: 500
 nroot_files_per_job: 40
 path_to_analysis_macro: "macro/analysis_piplus.C"
-path_to_eic_shell: "eic-shell/"
+path_to_eic_shell: "../../eic-shell/"

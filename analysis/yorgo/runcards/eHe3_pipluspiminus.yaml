@@ -6,4 +6,4 @@ is_beagle: true
 nfiles: 500000
 nroot_files_per_job: 40
 path_to_analysis_macro: "macro/analysis_dihadron.C"
-path_to_eic_shell: "eic-shell/"
+path_to_eic_shell: "../../eic-shell/"
