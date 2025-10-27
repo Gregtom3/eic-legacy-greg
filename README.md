@@ -39,7 +39,13 @@ You can then enter into the `eic-shell` with the following command:
 ./eic-shell/eic-shell
 ```
 
-To set up the environment and build all submodules, you must first be inside the `eic-shell`. Then, simply run:
+To set up the environment and build all submodules, you must first be inside the `eic-shell`. The `epic-analysis` submodule requires `delphes`. A first time installation can be run:
+
+```bash
+make delphes
+```
+
+Then, to install the remaining submodules, run:
 
 ```bash
 make all

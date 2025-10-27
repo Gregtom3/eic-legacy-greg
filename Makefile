@@ -3,7 +3,7 @@
 EIC_SHELL_DIR := eic-shell
 EIC_SHELL_INSTALL_SCRIPT := https://github.com/eic/eic-shell/raw/main/install.sh
 
-.PHONY: all eic-shell clean-eic-shell build-submodules setup-submodules clean-submodules clean update
+.PHONY: all eic-shell clean-eic-shell build-submodules setup-submodules clean-submodules clean update delphes
 
 all: build-submodules
 
@@ -18,9 +18,14 @@ setup-submodules:
 	@git submodule update --init --recursive
 	@echo "Submodules initialized and updated."
 
-build-submodules: setup-submodules
+delphes: 
+	@echo "Installing Delphes for epic-analysis submodule..."
+	@bash -c "cd submodules/epic-analysis && source environ.sh && deps/install_delphes.sh"
+	@echo "Delphes installation complete."
+
+build-submodules: setup-submodules 
 	@echo "Building submodules..."
-	@bash -c "cd submodules/epic-analysis && source environ.sh && deps/install_delphes.sh && make"
+	@bash -c "cd submodules/epic-analysis && source environ.sh && make"
 	@bash -c "cd submodules/tmd-eic-ana && make"
 	@echo "Selected submodules built successfully."
 
