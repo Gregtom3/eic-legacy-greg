@@ -20,7 +20,7 @@ setup-submodules:
 
 build-submodules: setup-submodules
 	@echo "Building submodules..."
-	@bash -c "cd submodules/epic-analysis && source environ.sh && make"
+	@bash -c "cd submodules/epic-analysis && source environ.sh && deps/install_delphes.sh && make"
 	@bash -c "cd submodules/tmd-eic-ana && make"
 	@echo "Selected submodules built successfully."
 
