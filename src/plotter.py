@@ -1,69 +1,111 @@
-import uproot
+import ROOT
 import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
-import matplotlib.patches as mpatches
-from io import StringIO
+from array import array
 from dataio import DataIO
+
+def style_hist(hist):
+    ROOT.gPad.SetLeftMargin(0.17)
+    ROOT.gPad.SetRightMargin(0.17)
+    ROOT.gPad.SetTopMargin(0.05)
+    ROOT.gPad.SetBottomMargin(0.12)
+    ROOT.gPad.SetTicks(1, 1)
+
+    if isinstance(hist, ROOT.TH2):
+        ROOT.gPad.SetGridx(1)
+        ROOT.gPad.SetGridy(1)
+
+    hist.GetXaxis().SetTitleSize(0.07)
+    hist.GetYaxis().SetTitleSize(0.07)
+    hist.GetZaxis().SetLabelSize(0.05)
+    hist.GetXaxis().SetLabelSize(0.05)
+    hist.GetYaxis().SetLabelSize(0.05)
+    hist.GetXaxis().SetTitleOffset(0.75)
+    hist.GetYaxis().SetTitleOffset(1.2)
+    hist.SetLineColor(1)
+    hist.SetLineWidth(2)
+    return hist
+
 
 class Plotter:
     """
-    Load a TTree from a .root file and generate plots
+    ROOT-only plotting class that prevents histogram garbage collection.
     """
     def __init__(self, data_io: DataIO):
         self.data_io = data_io
-        with uproot.open(data_io.filepath) as f:
-            t = f[data_io.treename]
-            arr = t.arrays(["X", "Q2", "Z", "PhPerp", "Weight"], library="np")
-        self.X = arr["X"]
-        self.Q2 = arr["Q2"]
-        self.Z = arr["Z"]
-        self.pT = arr["PhPerp"]
-        self.W = arr["Weight"]
-        self.Q = np.sqrt(self.Q2)
+        self.file = ROOT.TFile.Open(data_io.filepath)
+        self.tree = self.file.Get(data_io.treename)
 
-    def plot_xQ(self, ax):
-        xbins = np.logspace(-4, 0, 50)
-        Qbins = np.logspace(0, 2, 50)
-        H, xe, qe = np.histogram2d(self.X, self.Q, bins=[xbins, Qbins], weights=self.W)
-        mesh = ax.pcolormesh(xe, qe, H.T,
-                             norm=mcolors.LogNorm(vmin=1, vmax=H.max()+1),
-                             cmap="viridis")
-        ax.set_xscale("log")
-        ax.set_yscale("log")
-        ax.set_xlabel("x")
-        ax.set_ylabel("Q [GeV]")
-        return mesh
+        # Store objects so they persist
+        self._objs = []
 
-    def plot_zpT(self, ax):
-        mask = np.ones_like(self.X, dtype=bool)
-        zbins = np.linspace(0.05, 1.1, 50)
-        pTbins = np.linspace(-0.05, 3.0, 50)
-        H2, ze, pe = np.histogram2d(self.Z[mask], self.pT[mask], bins=[zbins, pTbins], weights=self.W[mask])
-        mesh = ax.pcolormesh(ze, pe, H2.T,
-                             norm=mcolors.LogNorm(vmin=1, vmax=H2.max()+1),
-                             cmap="viridis")
-        ax.set_xlabel("z")
-        ax.set_ylabel("pT [GeV]")
-        return mesh
+    def _keep(self, obj):
+        """Keep reference so ROOT doesn't delete it."""
+        self._objs.append(obj)
+        return obj
 
-    def plot_combo(self, plot_funcs, figsize=(10, 5), suptitle=None, **kwargs):
-        """
-        plot_funcs: list of callables, each f(ax, **kwargs)
-        kwargs are passed to each plotting function
-        """
-        fig, axes = plt.subplots(1, len(plot_funcs), figsize=figsize)
-        if len(plot_funcs) == 1:
-            axes = [axes]
-        meshes = []
-        for ax, func in zip(axes, plot_funcs):
-            meshes.append(func(ax, **kwargs))
-            plt.colorbar(meshes[-1], ax=ax, pad=0.01)
+    def plot_xQ(self, pad=None):
+        if pad:
+            pad.cd()
+
+        x_edges = array('d', np.logspace(-4, 0, 50+1))
+        q_edges = array('d', np.logspace(0, 2, 50+1))
+
+        h = ROOT.TH2F("h_xQ", "",
+                      len(x_edges)-1, x_edges,
+                      len(q_edges)-1, q_edges)
+        draw_cmd = "sqrt(Q2):X >> h_xQ"
+        self.tree.Draw(draw_cmd, "Weight", "COLZ")
+        h.SetDirectory(0)
+
+        ROOT.gPad.SetLogx()
+        ROOT.gPad.SetLogy()
+        ROOT.gPad.SetLogz()
+
+        h.GetXaxis().SetTitle("x")
+        h.GetYaxis().SetTitle("Q [GeV]")
+
+        style_hist(h)
+        return self._keep(h)
+
+    def plot_zpT(self, pad=None):
+        if pad:
+            pad.cd()
+
+        z_edges = array('d', np.linspace(0, 28, 50+1))
+        pT_edges = array('d', np.linspace(0, 100, 50+1))
+        h = ROOT.TH2F("h_zpT", "",
+                      len(z_edges)-1, z_edges,
+                      len(pT_edges)-1, pT_edges)
+        draw_cmd = "PhPerp:Z >> h_zpT"
+        self.tree.Draw(draw_cmd, "Weight", "COLZ")
+        h.SetDirectory(0)
+
+        ROOT.gPad.SetLogz()
+
+        h.GetXaxis().SetTitle("z")
+        h.GetYaxis().SetTitle("p_{T} [GeV]")
+
+        style_hist(h)
+        return self._keep(h)
+
+    def plot_combo(self, plot_funcs, ncols=1, suptitle=None):
+        n = len(plot_funcs)
+        nrows = (n + ncols - 1) // ncols
+
+        canvas = ROOT.TCanvas("combo", "combo", 400*ncols, 400*nrows)
+        canvas.Divide(ncols, nrows)
+
+        for i, func in enumerate(plot_funcs, start=1):
+            canvas.cd(i)
+            ROOT.gStyle.SetOptStat(0)
+            func(pad=ROOT.gPad)
+
         if suptitle:
-            fig.suptitle(suptitle)
-        plt.tight_layout()
-        plt.show()
-        print("Saving combo plot to:", self.data_io.get_output_dir() / "combo_plot.png")
-        plt.savefig(self.data_io.get_output_dir() / "combo_plot.png")
-        return axes
+            canvas.SetTitle(suptitle)
+
+        # Save + persist
+        out_path = self.data_io.get_output_dir() / "combo_plot.png"
+        print("Saving combo plot to:", out_path)
+        canvas.SaveAs(str(out_path))
+
+        return self._keep(canvas)

@@ -10,7 +10,7 @@ def main():
     data_io = DataIO(root_file, treename)
     plotter = Plotter(data_io)
     plotter.plot_combo([plotter.plot_xQ, plotter.plot_zpT],
-                       figsize=(12, 6),
+                       ncols=2,
                        suptitle="Dihadron Simulation Plots")
 
 if __name__ == "__main__":
