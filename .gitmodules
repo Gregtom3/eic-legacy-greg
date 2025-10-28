@@ -5,3 +5,6 @@
 	path = submodules/epic-analysis
 	url = https://github.com/eic/epic-analysis
 	branch = dihadron
+[submodule "submodules/yaml-cpp"]
+	path = submodules/yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp.git

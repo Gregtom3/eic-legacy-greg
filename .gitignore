@@ -4,6 +4,7 @@ eic-shell/
 # Ignore submodule directories
 submodules/epic-analysis/*
 submodules/tmd-eic-ana/*
+submodules/yaml-cpp/*
 
 # Ignore temporary files
 *.tmp

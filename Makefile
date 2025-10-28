@@ -3,7 +3,7 @@
 EIC_SHELL_DIR := eic-shell
 EIC_SHELL_INSTALL_SCRIPT := https://github.com/eic/eic-shell/raw/main/install.sh
 
-.PHONY: all eic-shell clean-eic-shell build-submodules setup-submodules clean-submodules clean update delphes
+.PHONY: all eic-shell clean-eic-shell build-submodules setup-submodules clean-submodules clean update delphes yaml-cpp
 
 all: build-submodules
 
@@ -23,7 +23,16 @@ delphes:
 	@bash -c "cd submodules/epic-analysis && source environ.sh && deps/install_delphes.sh"
 	@echo "Delphes installation complete."
 
-build-submodules: setup-submodules 
+yaml-cpp:
+	@echo "Installing yaml-cpp..."
+	@cd submodules/yaml-cpp && \
+	mkdir -p build && cd build && \
+	cmake .. -DCMAKE_INSTALL_PREFIX=$(HOME)/.local -DYAML_BUILD_SHARED_LIBS=ON && \
+	make && \
+	make install
+	@echo "yaml-cpp installation complete."
+
+build-submodules: setup-submodules yaml-cpp
 	@echo "Building submodules..."
 	@bash -c "cd submodules/epic-analysis && source environ.sh && make"
 	@bash -c "cd submodules/tmd-eic-ana && make"
