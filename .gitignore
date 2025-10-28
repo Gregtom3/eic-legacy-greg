@@ -22,3 +22,6 @@ submodules/yaml-cpp/*
 # Ignore injectout
 analysis/yorgo/injectout/
 analysis/filippo/injectout/
+
+# Ignore playground
+playground/

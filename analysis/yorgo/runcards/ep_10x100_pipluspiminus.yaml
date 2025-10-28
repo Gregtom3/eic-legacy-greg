@@ -1,0 +1,9 @@
+project_name: "PYTHIA8.ep_pipluspiminus"
+campaigns: ["epic.25.08.0"]
+detectors: ["epic_craterlake"]
+energies: ["10x100"]
+is_beagle: false
+nfiles: 500
+nroot_files_per_job: 40
+path_to_analysis_macro: "macro/analysis_dihadron.C"
+path_to_eic_shell: "../../eic-shell/"
