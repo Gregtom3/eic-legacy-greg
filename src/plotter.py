@@ -71,8 +71,8 @@ class Plotter:
         if pad:
             pad.cd()
 
-        z_edges = array('d', np.linspace(0, 28, 50+1))
-        pT_edges = array('d', np.linspace(0, 100, 50+1))
+        z_edges = array('d', np.linspace(0, 1, 50+1))
+        pT_edges = array('d', np.linspace(0, 10, 50+1))
         h = ROOT.TH2F("h_zpT", "",
                       len(z_edges)-1, z_edges,
                       len(pT_edges)-1, pT_edges)
