@@ -42,6 +42,7 @@ class Plotter:
         # Configuration dict for TH1F plots
         self.plot_configs = {
             'X': {
+                'branch_name': 'X',
                 'x_title': 'x',
                 'y_title': 'Counts',
                 'x_range': (1e-4, 1.0),
@@ -50,6 +51,7 @@ class Plotter:
                 'log_y': True
             },
             'Q2': {
+                'branch_name': 'Q2',
                 'x_title': 'Q^{2} [GeV^{2}]',
                 'y_title': 'Counts',
                 'x_range': (1.0, 100.0),
@@ -58,6 +60,7 @@ class Plotter:
                 'log_y': True
             },
             'Z': {
+                'branch_name': 'Z',
                 'x_title': 'z',
                 'y_title': 'Counts',
                 'x_range': (0.0, 1.1),
@@ -66,6 +69,7 @@ class Plotter:
                 'log_y': False
             },
             'PhPerp': {
+                'branch_name': 'PhPerp',
                 'x_title': 'p_{T} [GeV]',
                 'y_title': 'Counts',
                 'x_range': (0.0, 5.0),
@@ -74,6 +78,7 @@ class Plotter:
                 'log_y': False
             },
             'Y': {
+                'branch_name': 'Y',
                 'x_title': 'Y',
                 'y_title': 'Counts',
                 'x_range': (0.0, 1.0),
@@ -82,6 +87,7 @@ class Plotter:
                 'log_y': False
             },
             'XF1': {
+                'branch_name': 'XF1',
                 'x_title': 'x-Feynman (h_{1})',
                 'y_title': 'Counts',
                 'x_range': (-0.1, 1.0),
@@ -90,6 +96,7 @@ class Plotter:
                 'log_y': False
             },
             'XF2': {
+                'branch_name': 'XF2',
                 'x_title': 'x-Feynman (h_{2})',
                 'y_title': 'Counts',
                 'x_range': (-0.1, 1.0),
@@ -98,6 +105,7 @@ class Plotter:
                 'log_y': False
             },
             'XF': {
+                'branch_name': 'XF',
                 'x_title': 'x-Feynman',
                 'y_title': 'Counts',
                 'x_range': (-0.1, 1.0),
@@ -106,6 +114,7 @@ class Plotter:
                 'log_y': False
             },
             'Mh': {
+                'branch_name': 'Mh',
                 'x_title': 'M_{h} [GeV]',
                 'y_title': 'Counts',
                 'x_range': (0.0, 5.0),
@@ -114,6 +123,7 @@ class Plotter:
                 'log_y': False
             },
             'PhiH': {
+                'branch_name': 'PhiH',
                 'x_title': '#phi_{h} [rad]',
                 'y_title': 'Counts',
                 'x_range': (np.pi, np.pi),
@@ -122,6 +132,7 @@ class Plotter:
                 'log_y': False
             },
             'PhiRperp': {
+                'branch_name': 'PhiRperp',
                 'x_title': '#phi_{R#perp} [rad]',
                 'y_title': 'Counts',
                 'x_range': (np.pi, np.pi),
@@ -130,6 +141,7 @@ class Plotter:
                 'log_y': False
             },
             'PhiRT': {
+                'branch_name': 'PhiRT',
                 'x_title': '#phi_{R_{T}} [rad]',
                 'y_title': 'Counts',
                 'x_range': (np.pi, np.pi),
@@ -138,6 +150,7 @@ class Plotter:
                 'log_y': False
             },
             'ThetaCOM': {
+                'branch_name': 'ThetaCOM',
                 'x_title': '#Theta [rad]',
                 'y_title': 'Counts',
                 'x_range': (0.0, np.pi),
@@ -146,14 +159,26 @@ class Plotter:
                 'log_y': False
             },
             'Depol_SIDIS': {
+                'branch_name': 'Depol1',
                 'x_title': 'Depolarization Factor',
                 'y_title': 'Counts',
                 'x_range': (0, 1.0),
                 'n_bins': 100,
                 'log_x': False,
                 'log_y': False
-            },
+            }
         }
+
+    def update_plot_config(self, bin_name, config_updates):
+        """
+        Update or add configuration for a specific bin_name in plot_configs.
+
+        :param bin_name: The name of the bin (e.g., 'X', 'Q2')
+        :param config_updates: Dict of updates to apply (e.g., {'x_title': 'New Title', 'log_x': False})
+        """
+        if bin_name not in self.plot_configs:
+            self.plot_configs[bin_name] = {}
+        self.plot_configs[bin_name].update(config_updates)
 
     def _keep(self, obj):
         """Keep reference so ROOT doesn't delete it."""
@@ -213,6 +238,7 @@ class Plotter:
             raise ValueError(f"Bin name '{bin_name}' not found in plot_configs.")
 
         config = self.plot_configs[bin_name]
+        branch_name = config.get('branch_name', bin_name) # Actual branch name in TTree
         x_title = config['x_title']
         y_title = config['y_title']
         x_min, x_max = config['x_range']
@@ -229,7 +255,7 @@ class Plotter:
             h = ROOT.TH1F(hist_name, "", n_bins, bin_edges)
         else:
             h = ROOT.TH1F(hist_name, "", n_bins, x_min, x_max)
-        draw_cmd = f"{bin_name} >> {hist_name}"
+        draw_cmd = f"{branch_name} >> {hist_name}"
         self.tree.Draw(draw_cmd, "Weight", "goff")
         h.SetDirectory(0)
 
