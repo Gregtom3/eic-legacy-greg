@@ -9,9 +9,18 @@ def main():
     treename = "tree"
     data_io = DataIO(root_file, treename)
     plotter = Plotter(data_io)
-    plotter.plot_combo([plotter.plot_xQ, plotter.plot_zpT],
-                       ncols=2,
-                       suptitle="Dihadron Simulation Plots")
+    plotter.plot_combo([
+        plotter.plot_xQ,  
+        plotter.plot_zpT,
+        (plotter.plot_th1f, {'bin_name': 'Z'}),
+        (plotter.plot_th1f, {'bin_name': 'PhPerp'}),
+        (plotter.plot_th1f, {'bin_name': 'Mh'}),
+        (plotter.plot_th1f, {'bin_name': 'XF'}),
+        (plotter.plot_th1f, {'bin_name': 'MX'}),
+        (plotter.plot_th1f, {'bin_name': 'PhiH'}),
+        (plotter.plot_th1f, {'bin_name': 'Depol_SIDIS'}),
+    ], ncols=3, suptitle="Single Hadron SIDIS Plots")
+
 
 if __name__ == "__main__":
     main()
