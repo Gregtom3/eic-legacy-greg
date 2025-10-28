@@ -193,6 +193,7 @@ loop do
         "--n_injections", n_injections.to_s,
         "--extract_with_true", extract_with_true.to_s,
         "--targetPolarization", targetPolarization.to_s,
+        "--outFilename", "bins_#{bin_group.first}_to_#{bin_group.last}.yaml",
         "--bin_index_start", bin_group.first.to_s,
         "--bin_index_end", bin_group.last.to_s
       ]
