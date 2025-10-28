@@ -5,16 +5,16 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import matplotlib.patches as mpatches
 from io import StringIO
-
+from dataio import DataIO
 
 class Plotter:
     """
     Load a TTree from a .root file and generate plots
     """
-    def __init__(self, root_file, tree_name="tree"):
-        self.root_file = root_file
-        with uproot.open(root_file) as f:
-            t = f[tree_name]
+    def __init__(self, data_io: DataIO):
+        self.data_io = data_io
+        with uproot.open(data_io.filepath) as f:
+            t = f[data_io.treename]
             arr = t.arrays(["X", "Q2", "Z", "PhPerp", "Weight"], library="np")
         self.X = arr["X"]
         self.Q2 = arr["Q2"]
@@ -64,4 +64,6 @@ class Plotter:
             fig.suptitle(suptitle)
         plt.tight_layout()
         plt.show()
+        print("Saving combo plot to:", self.data_io.get_output_dir() / "combo_plot.png")
+        plt.savefig(self.data_io.get_output_dir() / "combo_plot.png")
         return axes

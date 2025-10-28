@@ -4,3 +4,16 @@ eic-shell/
 # Ignore submodule directories
 submodules/epic-analysis/*
 submodules/tmd-eic-ana/*
+
+# Ignore temporary files
+*.tmp
+*.log
+*.aux
+*.out
+*.pyc
+
+*.toc
+*.synctex.gz
+
+# Ignore virtual environment directories
+.venv/
