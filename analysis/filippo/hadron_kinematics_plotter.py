@@ -19,8 +19,8 @@ def main():
         dataset_name = root_file.split('/')[-2]  # e.g., 'PYTHIA8.ep_piplus___epic.25.08.0_5x41'
         plotter.update_plot_config('Q2', {'x_range': (1, max_Q2[files.index(root_file)])})
         plotter.plot_combo([
-            plotter.plot_xQ2,  
-            plotter.plot_zpT,
+            (plotter.plot_th2f, {'bin_x_name': 'X', 'bin_y_name': 'Q2'}),
+            (plotter.plot_th2f, {'bin_x_name': 'Z', 'bin_y_name': 'PhPerp'}),
             (plotter.plot_th1f, {'bin_name': 'Y'}),
             (plotter.plot_th1f, {'bin_name': 'W'}),
             (plotter.plot_th1f, {'bin_name': 'Z'}),

@@ -10,8 +10,8 @@ def main():
     data_io = DataIO(root_file, treename)
     plotter = Plotter(data_io)
     plotter.plot_combo([
-        plotter.plot_xQ2,  
-        plotter.plot_zpT,
+        (plotter.plot_th2f, {'bin_x_name': 'X', 'bin_y_name': 'Q2'}),
+        (plotter.plot_th2f, {'bin_x_name': 'Z', 'bin_y_name': 'PhPerp'}),
         (plotter.plot_th1f, {'bin_name': 'Z'}),
         (plotter.plot_th1f, {'bin_name': 'PhPerp'}),
         (plotter.plot_th1f, {'bin_name': 'Mh'}),

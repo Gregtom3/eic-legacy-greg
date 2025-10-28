@@ -54,7 +54,7 @@ class Plotter:
                 'branch_name': 'Q2',
                 'x_title': 'Q^{2} [GeV^{2}]',
                 'y_title': 'Counts',
-                'x_range': (1.0, 100.0),
+                'x_range': (1.0, 1000.0),
                 'n_bins': 100,
                 'log_x': True,
                 'log_y': True
@@ -193,58 +193,76 @@ class Plotter:
         """Keep reference so ROOT doesn't delete it."""
         self._objs.append(obj)
         return obj
+        
+    def plot_th2f(self, pad=None, bin_x_name=None, bin_y_name=None):
+        """
+        Plot a TH2F histogram using two entries in plot_configs.
 
-    def plot_xQ2(self, pad=None):
+        :param pad: ROOT.TPad to draw on (optional)
+        :param bin_x_name: key in plot_configs for the X-axis variable
+        :param bin_y_name: key in plot_configs for the Y-axis variable
+        """
+
+        # --- Validate configs ---
+        if bin_x_name not in self.plot_configs:
+            raise ValueError(f"X-axis bin '{bin_x_name}' not found in plot_configs.")
+        if bin_y_name not in self.plot_configs:
+            raise ValueError(f"Y-axis bin '{bin_y_name}' not found in plot_configs.")
+
+        cfg_x = self.plot_configs[bin_x_name]
+        cfg_y = self.plot_configs[bin_y_name]
+
+        branch_x = cfg_x.get('branch_name', bin_x_name)
+        branch_y = cfg_y.get('branch_name', bin_y_name)
+
+        x_min, x_max = cfg_x['x_range']
+        y_min, y_max = cfg_y['x_range']
+        nx = cfg_x['n_bins']
+        ny = cfg_y['n_bins']
+
+        log_x = cfg_x['log_x']
+        log_y = cfg_y['log_y']
+        # (We treat log_z automatically below)
+
+        # --- Create binning ---
+        if log_x:
+            x_bins = array('d', np.logspace(np.log10(x_min), np.log10(x_max), nx+1))
+        else:
+            x_bins = array('d', np.linspace(x_min, x_max, nx+1))
+
+        if log_y:
+            y_bins = array('d', np.logspace(np.log10(y_min), np.log10(y_max), ny+1))
+        else:
+            y_bins = array('d', np.linspace(y_min, y_max, ny+1))
+
+        # --- Create histogram ---
+        hist_name = f"h_{bin_x_name}_vs_{bin_y_name}"
+        h = ROOT.TH2F(hist_name, "",
+                       len(x_bins)-1, x_bins,
+                       len(y_bins)-1, y_bins)
+
+
         if pad:
             pad.cd()
 
-        x_min = self.plot_configs['X']['x_range'][0]
-        x_max = self.plot_configs['X']['x_range'][1]
-        q2_min = self.plot_configs['Q2']['x_range'][0]
-        q2_max = self.plot_configs['Q2']['x_range'][1]
-        x_edges = array('d', np.logspace(np.log10(x_min), np.log10(x_max), 50+1))
-        q2_edges = array('d', np.logspace(np.log10(q2_min), np.log10(q2_max), 50+1))
-
-        h = ROOT.TH2F("h_xQ2", "",
-                      len(x_edges)-1, x_edges,
-                      len(q2_edges)-1, q2_edges)
-        draw_cmd = "Q2:X >> h_xQ2"
+        # --- Draw tree data ---
+        draw_cmd = f"{branch_y}:{branch_x} >> {hist_name}"
         self.tree.Draw(draw_cmd, "Weight", "COLZ")
         h.SetDirectory(0)
+        # --- Log scales ---
+        if log_x:
+            ROOT.gPad.SetLogx()
+        if log_y:
+            ROOT.gPad.SetLogy()
+        ROOT.gPad.SetLogz()  # Always useful for 2D counts
 
-        ROOT.gPad.SetLogx()
-        ROOT.gPad.SetLogy()
-        ROOT.gPad.SetLogz()
-
-        h.GetXaxis().SetTitle("x")
-        h.GetYaxis().SetTitle("Q^{2} [GeV^{2}]")
-
-        style_hist(h)
-        return self._keep(h)
-
-    def plot_zpT(self, pad=None):
-        if pad:
-            pad.cd()
-
-        z_min = self.plot_configs['Z']['x_range'][0]
-        z_max = self.plot_configs['Z']['x_range'][1]
-        pT_min = self.plot_configs['PhPerp']['x_range'][0]
-        pT_max = self.plot_configs['PhPerp']['x_range'][1]
-        z_edges = array('d', np.linspace(z_min, z_max, 50+1))
-        pT_edges = array('d', np.linspace(pT_min, pT_max, 50+1))
-        h = ROOT.TH2F("h_zpT", "",
-                      len(z_edges)-1, z_edges,
-                      len(pT_edges)-1, pT_edges)
-        draw_cmd = "PhPerp:Z >> h_zpT"
-        self.tree.Draw(draw_cmd, "Weight", "COLZ")
-        h.SetDirectory(0)
-
-        ROOT.gPad.SetLogz()
-
-        h.GetXaxis().SetTitle("z")
-        h.GetYaxis().SetTitle("p_{T} [GeV]")
+        # --- Style ---
+        h.GetXaxis().SetTitle(cfg_x['x_title'])
+        h.GetYaxis().SetTitle(cfg_y['x_title'])
 
         style_hist(h)
+        h.Draw("COLZ")
+    
         return self._keep(h)
 
     def plot_th1f(self, pad=None, bin_name=None):
