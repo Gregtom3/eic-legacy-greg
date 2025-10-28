@@ -86,6 +86,15 @@ class Plotter:
                 'log_x': False,
                 'log_y': False
             },
+            'W': {
+                'branch_name': 'W',
+                'x_title': 'W [GeV]',
+                'y_title': 'Counts',
+                'x_range': (0.0, 200.0),
+                'n_bins': 100,
+                'log_x': False,
+                'log_y': False
+            },
             'XF1': {
                 'branch_name': 'XF1',
                 'x_title': 'x-Feynman (h_{1})',
@@ -104,8 +113,8 @@ class Plotter:
                 'log_x': False,
                 'log_y': False
             },
-            'XF': {
-                'branch_name': 'XF',
+            'xF': {
+                'branch_name': 'xF',
                 'x_title': 'x-Feynman',
                 'y_title': 'Counts',
                 'x_range': (-0.1, 1.0),
@@ -185,17 +194,21 @@ class Plotter:
         self._objs.append(obj)
         return obj
 
-    def plot_xQ(self, pad=None):
+    def plot_xQ2(self, pad=None):
         if pad:
             pad.cd()
 
-        x_edges = array('d', np.logspace(-4, 0, 50+1))
-        q_edges = array('d', np.logspace(0, 2, 50+1))
+        x_min = self.plot_configs['X']['x_range'][0]
+        x_max = self.plot_configs['X']['x_range'][1]
+        q2_min = self.plot_configs['Q2']['x_range'][0]
+        q2_max = self.plot_configs['Q2']['x_range'][1]
+        x_edges = array('d', np.logspace(np.log10(x_min), np.log10(x_max), 50+1))
+        q2_edges = array('d', np.logspace(np.log10(q2_min), np.log10(q2_max), 50+1))
 
-        h = ROOT.TH2F("h_xQ", "",
+        h = ROOT.TH2F("h_xQ2", "",
                       len(x_edges)-1, x_edges,
-                      len(q_edges)-1, q_edges)
-        draw_cmd = "sqrt(Q2):X >> h_xQ"
+                      len(q2_edges)-1, q2_edges)
+        draw_cmd = "Q2:X >> h_xQ2"
         self.tree.Draw(draw_cmd, "Weight", "COLZ")
         h.SetDirectory(0)
 
@@ -204,7 +217,7 @@ class Plotter:
         ROOT.gPad.SetLogz()
 
         h.GetXaxis().SetTitle("x")
-        h.GetYaxis().SetTitle("Q [GeV]")
+        h.GetYaxis().SetTitle("Q^{2} [GeV^{2}]")
 
         style_hist(h)
         return self._keep(h)
@@ -213,8 +226,12 @@ class Plotter:
         if pad:
             pad.cd()
 
-        z_edges = array('d', np.linspace(0, 20, 50+1))
-        pT_edges = array('d', np.linspace(0, 100, 50+1))
+        z_min = self.plot_configs['Z']['x_range'][0]
+        z_max = self.plot_configs['Z']['x_range'][1]
+        pT_min = self.plot_configs['PhPerp']['x_range'][0]
+        pT_max = self.plot_configs['PhPerp']['x_range'][1]
+        z_edges = array('d', np.linspace(z_min, z_max, 50+1))
+        pT_edges = array('d', np.linspace(pT_min, pT_max, 50+1))
         h = ROOT.TH2F("h_zpT", "",
                       len(z_edges)-1, z_edges,
                       len(pT_edges)-1, pT_edges)
