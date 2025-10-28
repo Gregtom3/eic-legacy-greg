@@ -64,3 +64,27 @@ To clean up the submodules, you can run:
 ```bash
 make clean
 ```
+
+### Setting Up a Virtual Environment
+
+To set up a Python virtual environment for this project, follow these steps:
+
+1. **Create the Virtual Environment**:
+   ```bash
+   python3 -m venv .venv
+   ```
+
+2. **Activate the Virtual Environment**:
+   ```bash
+   source .venv/bin/activate
+   ```
+
+3. **Install Dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Deactivate the Virtual Environment** (when done):
+   ```bash
+   deactivate
+   ```
