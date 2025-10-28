@@ -18,3 +18,7 @@ submodules/yaml-cpp/*
 
 # Ignore virtual environment directories
 .venv/
+
+# Ignore injectout
+analysis/yorgo/injectout/
+analysis/filippo/injectout/
