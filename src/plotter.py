@@ -7,9 +7,9 @@ import matplotlib.patches as mpatches
 from io import StringIO
 
 
-class BinningPlotter:
+class Plotter:
     """
-    Load a TTree from a .root file and generate x-Q, z-pT, and combined plots.
+    Load a TTree from a .root file and generate plots
     """
     def __init__(self, root_file, tree_name="tree"):
         self.root_file = root_file
@@ -23,21 +23,7 @@ class BinningPlotter:
         self.W = arr["Weight"]
         self.Q = np.sqrt(self.Q2)
 
-    @staticmethod
-    def load_bin_table(csv_file):
-        with open(csv_file, "r") as f:
-            content = f.read()
-        _, table = content.split("List of points \n")
-        return pd.read_csv(StringIO(table))
-
-    def get_bin(self, csv_file, bin_number):
-        df = self.load_bin_table(csv_file)
-        bins = df[["xMin", "xMax", "Qmin[GeV]", "Qmax[GeV]"]].drop_duplicates().to_numpy()
-        if bin_number >= len(bins):
-            raise ValueError(f"Bin index {bin_number} out of range 0-{len(bins)-1}")
-        return bins[bin_number]
-
-    def plot_xQ(self, ax, X_min=None, X_max=None, Q_min=None, Q_max=None):
+    def plot_xQ(self, ax):
         xbins = np.logspace(-4, 0, 50)
         Qbins = np.logspace(0, 2, 50)
         H, xe, qe = np.histogram2d(self.X, self.Q, bins=[xbins, Qbins], weights=self.W)
@@ -48,17 +34,10 @@ class BinningPlotter:
         ax.set_yscale("log")
         ax.set_xlabel("x")
         ax.set_ylabel("Q [GeV]")
-        if X_min is not None:
-            rect = mpatches.Rectangle((X_min, Q_min), X_max-X_min, Q_max-Q_min,
-                                      fill=False, color="red", linewidth=2)
-            ax.add_patch(rect)
         return mesh
 
-    def plot_zpT(self, ax, X_min=None, X_max=None, Q_min=None, Q_max=None):
-        if None in (X_min, X_max, Q_min, Q_max):
-            mask = np.ones_like(self.X, dtype=bool)
-        else:
-            mask = (self.X > X_min) & (self.X < X_max) & (self.Q > Q_min) & (self.Q < Q_max)
+    def plot_zpT(self, ax):
+        mask = np.ones_like(self.X, dtype=bool)
         zbins = np.linspace(0.05, 1.1, 50)
         pTbins = np.linspace(-0.05, 3.0, 50)
         H2, ze, pe = np.histogram2d(self.Z[mask], self.pT[mask], bins=[zbins, pTbins], weights=self.W[mask])
