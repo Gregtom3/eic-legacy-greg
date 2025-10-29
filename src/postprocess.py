@@ -185,7 +185,7 @@ class PostProcessor:
         fig.suptitle(", ".join([f"{k}: {v}" for k, v in self.terms.items()]), fontsize=16)
         plt.tight_layout()
         plt.savefig(os.path.join(self.directory, "asym_bin_extractions.png"))
-        print("[INFO] Saved asym_bin_extractions.png")
+        print(f"[INFO] Saved {os.path.join(self.directory, 'asym_bin_extractions.png')}")
         plt.show()
 
     def plot_asymmetry(self):
@@ -234,5 +234,5 @@ class PostProcessor:
 
         plt.tight_layout()
         plt.savefig(os.path.join(self.directory, "asymmetry_vs_bin_index.png"))
-        print("[INFO] Saved asymmetry_vs_bin_index.png")
+        print(f"[INFO] Saved {os.path.join(self.directory, 'asymmetry_vs_bin_index.png')}")
         plt.show()
