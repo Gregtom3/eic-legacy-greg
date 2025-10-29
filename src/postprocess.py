@@ -24,6 +24,28 @@ class PostProcessor:
         self.df = None
         self.load_bins()
         self.create_dataframe()
+        self.terms = self.collect_directory_terms()
+
+    def collect_directory_terms(self):
+        """
+        Collect terms from the directory path for metadata purposes.
+
+        e.g. directory = analysis/yorgo/injectout/Dihadron/10x166/EarlyScience/Helium3/X
+        would yield terms = ['Dihadron', '10x166', 'EarlyScience', 'Helium3', 'X']
+
+        Returns:    
+            dict: A dictionary with keys 'channel', 'energy', 'eic_timeline', 'target', 'grid'
+        """
+        parts = os.path.normpath(self.directory).split(os.sep)
+        term_data = parts[-5:]  # Get the last 5 parts of the path
+        terms = {
+            'channel': term_data[0],
+            'energy': term_data[1],
+            'eic_timeline': term_data[2],
+            'target': term_data[3],
+            'grid': term_data[4]
+        }
+        return terms
 
     def load_bins(self):
         """
@@ -74,6 +96,18 @@ class PostProcessor:
         """
         return self.df
 
+    def save_to_csv(self):
+        """
+        Save the DataFrame to a CSV file.
+        """
+        if self.df is None or self.df.empty:
+            print("No data to save")
+            return
+
+        output_path = os.path.join(self.directory, "ALL_INJECTION_RESULTS.csv")
+        self.df.to_csv(output_path)
+        print(f"[INFO] Saved DataFrame to {output_path}")
+
     def print(self):
         """
         Print the contents of the DataFrame.
@@ -102,7 +136,7 @@ class PostProcessor:
         num_cols = min(5, num_bins)  # Maximum 5 columns
         num_rows = (num_bins + num_cols - 1) // num_cols  # Calculate rows needed
 
-        fig, axes = plt.subplots(num_rows, num_cols, figsize=(5 * num_cols, 4 * num_rows))
+        fig, axes = plt.subplots(num_rows, num_cols, figsize=(6 * num_cols, 5 * num_rows))
         axes = axes.flatten()  # Flatten in case of multiple rows
 
         for i, (bin_index, row) in enumerate(self.df.iterrows()):
@@ -123,8 +157,8 @@ class PostProcessor:
 
             # Plot data points with error bars
             point_alpha = 1 if len(all_extracted) < 50 else 0.5
-            point_size = 50 if len(all_extracted) < 50 else 20
-            ax.errorbar(all_extracted, y_values, xerr=all_errors, fmt='o', color="black", label='Data points', alpha=point_alpha, markersize=point_size)
+            point_size = 6 if len(all_extracted) < 50 else 3
+            ax.errorbar(all_extracted, y_values, xerr=all_errors, fmt='o', color="black", label='Data points (w/ exp. error)', alpha=point_alpha, markersize=point_size)
 
             # Plot mean_extracted with 1-sigma error band
             ax.axvline(mean_extracted, color='blue', linestyle='dotted', label='Mean extracted')
@@ -148,5 +182,57 @@ class PostProcessor:
         for j in range(i + 1, len(axes)):
             axes[j].axis('off')
 
+        fig.suptitle(", ".join([f"{k}: {v}" for k, v in self.terms.items()]), fontsize=16)
         plt.tight_layout()
         plt.savefig(os.path.join(self.directory, "asym_bin_extractions.png"))
+        print("[INFO] Saved asym_bin_extractions.png")
+        plt.show()
+
+    def plot_asymmetry(self):
+        """
+        Plot the asymmetry as a function of bin index.
+
+        The x-axis represents the bin index, and the y-axis represents the asymmetry.
+        A scatter plot shows the reconstructed injected asymmetry (mean_extracted).
+        Two error bars are included:
+        1. Standard error bars with caps for the mean of "all_errors".
+        2. A red transparent band for the standard error of the mean.
+        """
+        if self.df is None or self.df.empty:
+            print("No data to plot")
+            return
+
+        bin_indices = self.df.index
+        mean_extracted = self.df['mean_extracted']
+        all_errors_mean = self.df['all_errors'].apply(lambda x: np.mean(x) if isinstance(x, list) else 0)
+        stddev_extracted = self.df['stddev_extracted']
+        n_points = self.df['all_extracted'].apply(lambda x: len(x) if isinstance(x, list) else 0)
+        true_asymmetry = self.df['injected']
+
+        # Calculate standard error of the mean
+        error_in_mean = stddev_extracted / np.sqrt(n_points)
+
+        fig, ax = plt.subplots(figsize=(10, 6))
+
+        # Scatter plot for mean_extracted
+        ax.errorbar(bin_indices, mean_extracted, yerr=all_errors_mean, fmt='o', capsize=5, label='Expected EIC AUT w/ Error', color='black')
+
+        # Red transparent band for standard error of the mean
+        ax.fill_between(bin_indices, mean_extracted - error_in_mean, mean_extracted + error_in_mean,
+                         color='red', alpha=0.2, label='Monte Carlo Statistical Uncertainty in AUT')
+
+        # Plot true asymmetry line
+        ax.plot(bin_indices, true_asymmetry, color='blue', linestyle='dashed', label='True Injected AUT')
+
+        # Labels and legend
+        ax.set_title(", ".join([f"{k}: {v}" for k, v in self.terms.items()]))
+        ax.set_xlabel("Bin Index")
+        ax.set_ylabel("Asymmetry")
+        ax.set_xticks(bin_indices)  # Ensure x-axis labels are integers
+        ax.grid(True, which='both', linestyle='--', linewidth=0.5, alpha=0.7)  # Add x-y grid
+        ax.legend()
+
+        plt.tight_layout()
+        plt.savefig(os.path.join(self.directory, "asymmetry_vs_bin_index.png"))
+        print("[INFO] Saved asymmetry_vs_bin_index.png")
+        plt.show()

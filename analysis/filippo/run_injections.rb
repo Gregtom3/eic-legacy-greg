@@ -22,7 +22,7 @@ config_5x41 = {
   eic_timeline:      "Full",
   target:            "Proton",
   grid:              "X",
-  n_injections:      100,
+  n_injections:      1000,
   extract_with_true: false,
   targetPolarization: 0.7,
   bins_per_slurm_job: 1
@@ -43,7 +43,7 @@ config_10x100 = {
   eic_timeline:      "Full",
   target:            "Proton",
   grid:              "X",
-  n_injections:      100,
+  n_injections:      1000,
   extract_with_true: false,
   targetPolarization: 0.7,
   bins_per_slurm_job: 1
@@ -64,7 +64,7 @@ config_18x275 = {
   eic_timeline:      "Full",
   target:            "Proton",
   grid:              "X",
-  n_injections:      100,
+  n_injections:      1000,
   extract_with_true: false,
   targetPolarization: 0.7,
   bins_per_slurm_job: 1

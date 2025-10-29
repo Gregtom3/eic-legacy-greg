@@ -5,8 +5,9 @@ sys.path.insert(0, str(src_path))
 from postprocess import PostProcessor
 
 
-DIRECTORIES = ["analysis/yorgo/injectout/Dihadron/10x166/EarlyScience/Helium3/X",
-               "analysis/yorgo/injectout/Dihadron/10x100/EarlyScience/Proton/X"]
+DIRECTORIES = ["analysis/filippo/injectout/Hadron/5x41/Full/Proton/X",
+               "analysis/filippo/injectout/Hadron/10x100/Full/Proton/X",
+               "analysis/filippo/injectout/Hadron/18x275/Full/Proton/X"]
 
 def main():
     for DIRECTORY in DIRECTORIES:
