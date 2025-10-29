@@ -10,12 +10,13 @@ include InjectionWorkflow
 ENV['LD_LIBRARY_PATH'] = "#{ENV['HOME']}/.local/lib64:#{ENV['LD_LIBRARY_PATH']}"
 
 # Configuration Parameters
+# For the eHe3 dihadron injections
 config = {
   main_outdir:       "analysis/yorgo/injectout",
   file:              "out/BeAGLE.eHe3_pipluspiminus___epic.25.08.0_10x166/analysis.root",
   tree:              "dihadron_tree",
   energy:            "10x166",
-  table:             "tables/x_only/AUT_average_PV20_EPIC_piplus_sqrts=28.636.txt",
+  table:             "analysis/yorgo/tables/x_binning_table.csv",
   maxEntries:        10000,
   channel:           "Dihadron",
   eic_timeline:      "EarlyScience",
@@ -28,3 +29,25 @@ config = {
 }
 
 run_injection_workflow(config)
+
+# Configuration Parameters
+# For the ep dihadron injections
+config = {
+  main_outdir:       "analysis/yorgo/injectout",
+  file:              "out/PYTHIA8.ep_pipluspiminus___epic.25.08.0_10x100/analysis.root",
+  tree:              "dihadron_tree",
+  energy:            "10x100",
+  table:             "analysis/yorgo/tables/x_binning_table.csv",
+  maxEntries:        10000,
+  channel:           "Dihadron",
+  eic_timeline:      "EarlyScience",
+  target:            "Proton",
+  grid:              "X",
+  n_injections:      1,
+  extract_with_true: false,
+  targetPolarization: 0.7,
+  bins_per_slurm_job: 5
+}
+
+run_injection_workflow(config)
+
