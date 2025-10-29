@@ -17,15 +17,15 @@ config_5x41 = {
   tree:              "tree",
   energy:            "5x41",
   table:             "analysis/filippo/tables/x_only/AUT_average_PV20_EPIC_piplus_sqrts=28.636.txt",
-  maxEntries:        10000,
+  maxEntries:        500_000_000,
   channel:           "Hadron",
   eic_timeline:      "Full",
   target:            "Proton",
   grid:              "X",
-  n_injections:      1,
+  n_injections:      100,
   extract_with_true: false,
   targetPolarization: 0.7,
-  bins_per_slurm_job: 5
+  bins_per_slurm_job: 1
 }
 
 run_injection_workflow(config_5x41)
@@ -38,15 +38,15 @@ config_10x100 = {
   tree:              "tree",
   energy:            "10x100",
   table:             "analysis/filippo/tables/x_only/AUT_average_PV20_EPIC_piplus_sqrts=63.246.txt",
-  maxEntries:        10000,
+  maxEntries:        500_000_000,
   channel:           "Hadron",
   eic_timeline:      "Full",
   target:            "Proton",
   grid:              "X",
-  n_injections:      1,
+  n_injections:      100,
   extract_with_true: false,
   targetPolarization: 0.7,
-  bins_per_slurm_job: 5
+  bins_per_slurm_job: 1
 }
 
 run_injection_workflow(config_10x100)
@@ -59,15 +59,15 @@ config_18x275 = {
   tree:              "tree",
   energy:            "18x275",
   table:             "analysis/filippo/tables/x_only/AUT_average_PV20_EPIC_piplus_sqrts=140.712.txt",
-  maxEntries:        10000,
+  maxEntries:        500_000_000,
   channel:           "Hadron",
   eic_timeline:      "Full",
   target:            "Proton",
   grid:              "X",
-  n_injections:      1,
+  n_injections:      100,
   extract_with_true: false,
   targetPolarization: 0.7,
-  bins_per_slurm_job: 5
+  bins_per_slurm_job: 1
 }
 
 run_injection_workflow(config_18x275)
