@@ -102,12 +102,13 @@ class PostProcessor:
         """
 
         output_df = self.df.copy()
+        output_df["injected_asymmetry"] = output_df["injected"]
         output_df["reconstructed_asymmetry"] = output_df["mean_extracted"]
         output_df["reconstructed_asymmetry_montecarlo_stderr"] = output_df["stddev_extracted"]
-        output_df["reconstructed_asymmetry_err"] = output_df["stderr_mean_extracted"] / np.sqrt(output_df["events"])
+        output_df["reconstructed_asymmetry_err"] = output_df["stddev_extracted"] / np.sqrt(output_df["events"])
 
         # Drop unnecessary columns
-        output_df.drop(columns=["mean_extracted", "stddev_extracted","all_extracted","all_errors"], inplace=True)
+        output_df.drop(columns=["mean_extracted", "stddev_extracted","all_extracted","all_errors", "injected"], inplace=True)
 
         if output_df is None or output_df.empty:
             print("No data to save")
