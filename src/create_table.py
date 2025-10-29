@@ -51,13 +51,7 @@ def generate_table(list_of_bin_edges, list_of_bin_names, aut_value):
     
     # Calculate total number of bins
     total_bins = len(combinations)
-    
-    # Determine AUT value per bin
-    if aut_value == total_bins:
-        aut_per_bin = aut_value / total_bins
-    else:
-        aut_per_bin = 0
-    
+
     # Create DataFrame
     data = []
     for combo in combinations:
@@ -72,7 +66,7 @@ def generate_table(list_of_bin_edges, list_of_bin_names, aut_value):
             'Z_max': 9999,
             'PhPerp_min': 0,
             'PhPerp_max': 9999,
-            'AUT': aut_per_bin
+            'AUT': aut_value
         }
         
         # Set the actual bin values for provided dimensions
@@ -128,7 +122,7 @@ def yorgo_x_table():
     ])
     
     # Generate table with X binning only
-    df = generate_table([xbins], ['X'], aut_value=0)
+    df = generate_table([xbins], ['X'], aut_value=0.1)
     if df is not None:
         print("Generated Yorgo X table:")
         print(df)
