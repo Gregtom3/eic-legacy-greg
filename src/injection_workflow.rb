@@ -48,9 +48,36 @@ module InjectionWorkflow
     # Create SLURM scripts
     (0...bins).each_slice(cfg[:bins_per_slurm_job]) do |bin_group|
         job_name = "inj_#{bin_group.first}_to_#{bin_group.last}_#{cfg[:energy]}"
+        slurm_path  = File.join(job_dir, "slurm_#{job_name}.slurm")
         script_path = File.join(job_dir, "slurm_#{job_name}.sh")
 
+        cmd = [
+            "./submodules/tmd-eic-ana/bin/inject",
+            "--file #{cfg[:file]}",
+            "--tree #{cfg[:tree]}",
+            "--energy #{cfg[:energy]}",
+            "--table #{cfg[:table]}",
+            "--outDir #{outDir}",
+            "--maxEntries #{cfg[:maxEntries]}",
+            "--channel #{cfg[:channel]}",
+            "--eic_timeline #{cfg[:eic_timeline]}",
+            "--target #{cfg[:target]}",
+            "--grid #{cfg[:grid]}",
+            "--n_injections #{cfg[:n_injections]}",
+            "--extract_with_true #{cfg[:extract_with_true]}",
+            "--targetPolarization #{cfg[:targetPolarization]}",
+            "--bin_index_start #{bin_group.first}",
+            "--bin_index_end #{bin_group.last}",
+            "--outFilename bins_#{bin_group.first}_to_#{bin_group.last}.yaml"
+        ]
         File.open(script_path, "w") do |f|
+        f.puts "#!/bin/bash"
+        f.puts "export LD_LIBRARY_PATH=#{ENV['HOME']}/.local/lib64:#{ENV['LD_LIBRARY_PATH']}"
+        f.puts cmd.join(' ')
+        end
+        FileUtils.chmod("+x", script_path)
+
+        File.open(slurm_path, "w") do |f|
         f.puts "#!/bin/bash"
         f.puts "#SBATCH --job-name=#{job_name}"
         f.puts "#SBATCH --output=#{job_dir}/%x_%j.out"
@@ -60,28 +87,13 @@ module InjectionWorkflow
         f.puts "#SBATCH --cpus-per-task=2"
         f.puts "#SBATCH --mem-per-cpu=4G"
         f.puts "#SBATCH --time=24:00:00"
-        f.puts
-        f.puts "srun ./submodules/tmd-eic-ana/bin/inject \\"
-        f.puts "  --file #{cfg[:file]} \\"
-        f.puts "  --tree #{cfg[:tree]} \\"
-        f.puts "  --energy #{cfg[:energy]} \\"
-        f.puts "  --table #{cfg[:table]} \\"
-        f.puts "  --outDir #{outDir} \\"
-        f.puts "  --maxEntries #{cfg[:maxEntries]} \\"
-        f.puts "  --channel #{cfg[:channel]} \\"
-        f.puts "  --eic_timeline #{cfg[:eic_timeline]} \\"
-        f.puts "  --target #{cfg[:target]} \\"
-        f.puts "  --grid #{cfg[:grid]} \\"
-        f.puts "  --n_injections #{cfg[:n_injections]} \\"
-        f.puts "  --extract_with_true #{cfg[:extract_with_true]} \\"
-        f.puts "  --targetPolarization #{cfg[:targetPolarization]} \\"
-        f.puts "  --bin_index_start #{bin_group.first} \\"
-        f.puts "  --bin_index_end #{bin_group.last} \\"
-        f.puts "  --outFilename bins_#{bin_group.first}_to_#{bin_group.last}.yaml"
+        f.puts ""
+        f.puts %(eic-shell/eic-shell -- "#{script_path}")
         end
 
-        slurm_scripts << script_path
-        puts "Created SLURM script: #{script_path}"
+        
+        slurm_scripts << slurm_path
+        puts "Created SLURM scripts: #{slurm_path}, #{script_path}"
     end
 
     puts "\nSLURM job scripts located in: #{job_dir}\n"

@@ -22,10 +22,10 @@ config = {
   eic_timeline:      "EarlyScience",
   target:            "Helium3",
   grid:              "X",
-  n_injections:      5,
+  n_injections:      100,
   extract_with_true: false,
   targetPolarization: 0.7,
-  bins_per_slurm_job: 5
+  bins_per_slurm_job: 1
 }
 
 run_injection_workflow(config)
@@ -43,10 +43,10 @@ config = {
   eic_timeline:      "EarlyScience",
   target:            "Proton",
   grid:              "X",
-  n_injections:      5,
+  n_injections:      100,
   extract_with_true: false,
   targetPolarization: 0.7,
-  bins_per_slurm_job: 5
+  bins_per_slurm_job: 1
 }
 
 run_injection_workflow(config)
