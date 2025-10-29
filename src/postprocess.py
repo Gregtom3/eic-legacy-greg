@@ -100,12 +100,21 @@ class PostProcessor:
         """
         Save the DataFrame to a CSV file.
         """
-        if self.df is None or self.df.empty:
+
+        output_df = self.df.copy()
+        output_df["reconstructed_asymmetry"] = output_df["mean_extracted"]
+        output_df["reconstructed_asymmetry_montecarlo_stderr"] = output_df["stddev_extracted"]
+        output_df["reconstructed_asymmetry_err"] = output_df["stderr_mean_extracted"] / np.sqrt(output_df["events"])
+
+        # Drop unnecessary columns
+        output_df.drop(columns=["mean_extracted", "stddev_extracted", "stderr_mean_extracted","all_extracted","all_errors"], inplace=True)
+
+        if output_df is None or output_df.empty:
             print("No data to save")
             return
 
         output_path = os.path.join(self.directory, "ALL_INJECTION_RESULTS.csv")
-        self.df.to_csv(output_path)
+        output_df.to_csv(output_path)
         print(f"[INFO] Saved DataFrame to {output_path}")
 
     def print(self):
