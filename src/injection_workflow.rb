@@ -101,8 +101,8 @@ module InjectionWorkflow
     # Prompt for execution mode
     loop do
         puts "Choose execution mode:"
-        puts "1: Submit batch jobs (outside eic-shell)"
-        puts "2: Run directly (inside eic-shell)"
+        puts "1: Submit batch jobs (Must be currently **outside** eic-shell)"
+        puts "2: Run directly (Must be currently **inside** eic-shell)"
         puts "3: Cancel"
         print "> "
         case STDIN.gets.strip
