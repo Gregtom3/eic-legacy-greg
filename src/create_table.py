@@ -104,10 +104,6 @@ def yorgo_x_table():
     Generate a table with X binning for Yorgo's analysis.
     """
     xbins = np.array([
-        1.58e-05,
-        2.51e-05,
-        3.98e-05,
-        6.31e-05,
         0.0001,
         0.0001585,
         0.0002512,
@@ -135,7 +131,7 @@ def yorgo_x_table():
     df = generate_table([xbins], ['X'], aut_value=0)
     if df is not None:
         print("Generated Yorgo X table:")
-        print(df.head())
+        print(df)
         df.to_csv("analysis/yorgo/tables/x_binning_table.csv", index=False)
 
 

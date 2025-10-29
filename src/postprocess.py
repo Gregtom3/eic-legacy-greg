@@ -1,6 +1,8 @@
 import os
 import yaml
 import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
 
 class PostProcessor:
     """
@@ -83,3 +85,58 @@ class PostProcessor:
             return
         print("DataFrame contents:")
         print(self.df)
+
+    def plot_bins(self):
+        """
+        Plot the bin data in a grid of subplots.
+
+        Each subplot corresponds to a bin and shows data points with x error bars.
+        A vertical dotted line represents the mean_extracted value with a red faded
+        transparent 1-sigma error band.
+        """
+        if self.df is None or self.df.empty:
+            print("No data to plot")
+            return
+
+        num_bins = len(self.df)
+        num_cols = min(5, num_bins)  # Maximum 5 columns
+        num_rows = (num_bins + num_cols - 1) // num_cols  # Calculate rows needed
+
+        fig, axes = plt.subplots(num_rows, num_cols, figsize=(5 * num_cols, 4 * num_rows))
+        axes = axes.flatten()  # Flatten in case of multiple rows
+
+        for i, (bin_index, row) in enumerate(self.df.iterrows()):
+            ax = axes[i]
+
+            # Extract data for plotting
+            all_extracted = row.get('all_extracted', [])
+            all_errors = row.get('all_errors', [])
+            mean_extracted = row.get('mean_extracted', 0)
+            stddev_extracted = row.get('stddev_extracted', 0)
+
+            if not all_extracted or not all_errors:
+                ax.text(0.5, 0.5, 'No data', ha='center', va='center', fontsize=12)
+                ax.axis('off')
+                continue
+
+            y_values = np.arange(len(all_extracted))  # Spaced out y values
+
+            # Plot data points with error bars
+            ax.errorbar(all_extracted, y_values, xerr=all_errors, fmt='o', label='Data points')
+
+            # Plot mean_extracted with 1-sigma error band
+            ax.axvline(mean_extracted, color='blue', linestyle='dotted', label='Mean extracted')
+            ax.fill_betweenx(y_values, mean_extracted - stddev_extracted, mean_extracted + stddev_extracted,
+                             color='red', alpha=0.2, label='1-sigma band')
+
+            ax.set_title(f"Bin {bin_index}")
+            ax.set_xlabel("Extracted Value")
+            ax.set_ylabel("Trial Index")
+            ax.legend()
+
+        # Turn off unused subplots
+        for j in range(i + 1, len(axes)):
+            axes[j].axis('off')
+
+        plt.tight_layout()
+        plt.savefig(os.path.join(self.directory, "asym_bin_extractions.png"))

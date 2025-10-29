@@ -10,6 +10,7 @@ DIRECTORY = "analysis/yorgo/injectout/Dihadron/10x166/EarlyScience/Helium3/X"
 def main():
     processor = PostProcessor(DIRECTORY)
     processor.print()
+    processor.plot_bins()
 
 if __name__ == "__main__":
     main()
