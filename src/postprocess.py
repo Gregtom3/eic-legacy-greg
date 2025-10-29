@@ -122,13 +122,23 @@ class PostProcessor:
             y_values = np.arange(len(all_extracted))  # Spaced out y values
 
             # Plot data points with error bars
-            ax.errorbar(all_extracted, y_values, xerr=all_errors, fmt='o', label='Data points')
+            point_alpha = 1 if len(all_extracted) < 50 else 0.5
+            point_size = 50 if len(all_extracted) < 50 else 20
+            ax.errorbar(all_extracted, y_values, xerr=all_errors, fmt='o', color="black", label='Data points', alpha=point_alpha, markersize=point_size)
 
             # Plot mean_extracted with 1-sigma error band
             ax.axvline(mean_extracted, color='blue', linestyle='dotted', label='Mean extracted')
             ax.fill_betweenx(y_values, mean_extracted - stddev_extracted, mean_extracted + stddev_extracted,
-                             color='red', alpha=0.2, label='1-sigma band')
+                             color='blue', alpha=0.2, label='1-sigma band')
 
+            # Calculate error in the mean by hand
+            n_points = len(all_extracted)
+            if n_points > 0:
+                error_in_mean = stddev_extracted / np.sqrt(n_points)
+                ax.fill_betweenx(y_values, mean_extracted - error_in_mean, mean_extracted + error_in_mean,
+                                 color='black', alpha=0.2, label='Error in mean')
+
+            
             ax.set_title(f"Bin {bin_index}")
             ax.set_xlabel("Extracted Value")
             ax.set_ylabel("Trial Index")
