@@ -107,7 +107,7 @@ class PostProcessor:
         output_df["reconstructed_asymmetry_err"] = output_df["stderr_mean_extracted"] / np.sqrt(output_df["events"])
 
         # Drop unnecessary columns
-        output_df.drop(columns=["mean_extracted", "stddev_extracted", "stderr_mean_extracted","all_extracted","all_errors"], inplace=True)
+        output_df.drop(columns=["mean_extracted", "stddev_extracted","all_extracted","all_errors"], inplace=True)
 
         if output_df is None or output_df.empty:
             print("No data to save")
