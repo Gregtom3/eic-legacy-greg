@@ -8,6 +8,9 @@ module InjectionWorkflow
     def run_injection_workflow(cfg)
     outDir = "#{cfg[:main_outdir]}/#{cfg[:channel]}/#{cfg[:energy]}/#{cfg[:eic_timeline]}/#{cfg[:target]}/#{cfg[:grid]}/"
     FileUtils.mkdir_p(outDir) unless Dir.exist?(outDir)
+    
+    # Delete yaml files in outDir
+    Dir.glob("#{outDir}/*.yaml").each { |f| File.delete(f) }
 
     timestamp = Time.now.strftime("%Y%m%d_%H%M%S")
     job_dir = "#{outDir}/slurm/#{timestamp}"
