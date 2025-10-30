@@ -20,8 +20,19 @@ submodules/yaml-cpp/*
 .venv/
 
 # Ignore injectout
-analysis/yorgo/injectout/
-analysis/filippo/injectout/
+analysis/filippo/injectout/**/*.yaml
+analysis/filippo/injectout/**/*.txt
+analysis/filippo/injectout/**/*.log
+analysis/filippo/injectout/**/*.err
+analysis/filippo/injectout/**/*.sh
+analysis/filippo/injectout/**/*.slurm
+
+analysis/yorgo/injectout/**/*.yaml
+analysis/yorgo/injectout/**/*.txt
+analysis/yorgo/injectout/**/*.log
+analysis/yorgo/injectout/**/*.err
+analysis/yorgo/injectout/**/*.sh
+analysis/yorgo/injectout/**/*.slurm
 
 # Ignore playground
 playground/
