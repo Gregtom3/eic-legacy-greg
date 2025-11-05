@@ -1,4 +1,4 @@
-itar,ihad,X_min,X_max,Q_min,Q_max,Z_min,Z_max,PhPerp_min,PhPerp_max,AUT
+itar,ihad,X_min,X_max,Q_min,Q_max,Z_min,Z_max,Mh_min,Mh_max,AUT
 1,1,0.0001,0.0001585,0,9999,0,9999,0,9999,0.1
 1,1,0.0001585,0.0002512,0,9999,0,9999,0,9999,0.1
 1,1,0.0002512,0.0003981,0,9999,0,9999,0,9999,0.1
