@@ -67,6 +67,8 @@ make clean
 
 ### Setting Up a Virtual Environment
 
+NOTE: I would've ideally like to have this setup properly. But, it seems like the `eic-shell` has all the necessary packages this project uses, so I wouldn't bother right now setting up a virtual environment.
+
 To set up a Python virtual environment for this project, follow these steps:
 
 1. **Create the Virtual Environment**:

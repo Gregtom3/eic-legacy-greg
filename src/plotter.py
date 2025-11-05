@@ -2,6 +2,11 @@ import ROOT
 import numpy as np
 from array import array
 from dataio import DataIO
+import pandas as pd
+import glob
+from pathlib import Path
+from PIL import Image
+
 
 def style_hist(hist):
     ROOT.gPad.SetLeftMargin(0.21)
@@ -35,9 +40,12 @@ class Plotter:
         self.data_io = data_io
         self.file = ROOT.TFile.Open(data_io.filepath)
         self.tree = self.file.Get(data_io.treename)
-
+        self.table = ""
+        self.table_df = None
         # Store objects so they persist
         self._objs = []
+        # simple canvas counter to give unique canvas names
+        self._canvas_count = 0
 
         # Configuration dict for TH1F plots
         self.plot_configs = {
@@ -54,7 +62,7 @@ class Plotter:
                 'branch_name': 'Q2',
                 'x_title': 'Q^{2} [GeV^{2}]',
                 'y_title': 'Counts',
-                'x_range': (1.0, 1000.0),
+                'x_range': (1.0, 5000.0),
                 'n_bins': 100,
                 'log_x': True,
                 'log_y': True
@@ -178,6 +186,21 @@ class Plotter:
             }
         }
 
+    def load_table(self, table_name):
+        """
+        Load a table by name.
+
+        :param table_name: Name of the table to load.
+        """
+        # Verify table exists
+        import os
+        if not os.path.isfile(table_name):
+            raise FileNotFoundError(f"Table file '{table_name}' not found.")
+        self.table = table_name
+        self.table_df = pd.read_csv(table_name)
+        # Summarize loaded table
+        print(f"Loaded table '{table_name}' with {len(self.table_df)} rows.")
+
     def update_plot_config(self, bin_name, config_updates):
         """
         Update or add configuration for a specific bin_name in plot_configs.
@@ -193,14 +216,15 @@ class Plotter:
         """Keep reference so ROOT doesn't delete it."""
         self._objs.append(obj)
         return obj
-        
-    def plot_th2f(self, pad=None, bin_x_name=None, bin_y_name=None):
+
+    def plot_th2f(self, pad=None, bin_x_name=None, bin_y_name=None, cut="Weight", bin_rects=None, special_bin_rect=None):
         """
         Plot a TH2F histogram using two entries in plot_configs.
 
         :param pad: ROOT.TPad to draw on (optional)
         :param bin_x_name: key in plot_configs for the X-axis variable
         :param bin_y_name: key in plot_configs for the Y-axis variable
+        :param cut: cut string for the tree draw
         """
 
         # --- Validate configs ---
@@ -247,7 +271,7 @@ class Plotter:
 
         # --- Draw tree data ---
         draw_cmd = f"{branch_y}:{branch_x} >> {hist_name}"
-        self.tree.Draw(draw_cmd, "Weight", "COLZ")
+        self.tree.Draw(draw_cmd, cut, "COLZ")
         h.SetDirectory(0)
         # --- Log scales ---
         if log_x:
@@ -262,7 +286,52 @@ class Plotter:
 
         style_hist(h)
         h.Draw("COLZ")
-    
+        # --- Draw bin rectangles if provided ---
+        if bin_rects:
+            # get current canvas/pad to attach primitives if needed
+            try:
+                canvas = ROOT.gPad.GetCanvas()
+            except Exception:
+                canvas = None
+
+            for irect, rect in enumerate(bin_rects):
+                try:
+                    xmin, xmax, ymin, ymax = rect
+                except Exception:
+                    # Skip invalid rect entries
+                    continue
+                # Reset xmax, ymax if it reaches beyond axis range
+                if xmax > x_max:
+                    xmax = x_max
+                if ymax > y_max:
+                    ymax = y_max
+                box = ROOT.TBox(xmin, ymin, xmax, ymax)
+                box.SetFillStyle(0)  # transparent
+
+                box.SetLineColor(ROOT.kBlack)
+                box.SetLineWidth(1)
+                box.SetLineStyle(1)
+                box.Draw("same")
+                self._objs.append(box)
+            # Draw the special bin rectangle if provided
+            if special_bin_rect:
+                try:
+                    xmin, xmax, ymin, ymax = special_bin_rect
+                except Exception:
+                    pass
+                else:
+                    # Reset xmax, ymax if it reaches beyond axis range
+                    if xmax > x_max:
+                        xmax = x_max
+                    if ymax > y_max:
+                        ymax = y_max
+                    box = ROOT.TBox(xmin, ymin, xmax, ymax)
+                    box.SetFillStyle(0)  # transparent
+                    box.SetLineColor(ROOT.kRed)
+                    box.SetLineWidth(3)
+                    box.SetLineStyle(1)
+                    box.Draw("same")
+                    self._objs.append(box)
         return self._keep(h)
 
     def plot_th1f(self, pad=None, bin_name=None):
@@ -306,15 +375,16 @@ class Plotter:
         h.Draw("hist")
         return self._keep(h)
 
-    def plot_combo(self, plot_funcs, ncols=1, suptitle=None):
+    def plot_combo(self, plot_funcs, ncols=1, suptitle=None, output_name="combo_plot.png"):
         """
         plot_funcs: list of callables or tuples (callable, kwargs_dict)
         Each func should accept pad as a keyword argument.
         """
         n = len(plot_funcs)
         nrows = (n + ncols - 1) // ncols
-
-        canvas = ROOT.TCanvas("combo", "combo", 400*ncols, 400*nrows)
+        self._canvas_count += 1
+        cname = f"combo_{self._canvas_count}"
+        canvas = ROOT.TCanvas(cname, cname, 400*ncols, 400*nrows)
         canvas.Divide(ncols, nrows)
 
         for i, item in enumerate(plot_funcs, start=1):
@@ -332,8 +402,135 @@ class Plotter:
             canvas.SetTitle(suptitle)
 
         # Save + persist
-        out_path = self.data_io.get_output_dir() / "combo_plot.png"
+        out_path = self.data_io.get_output_dir() / output_name  
         print("Saving combo plot to:", out_path)
         canvas.SaveAs(str(out_path))
 
         return self._keep(canvas)
+
+    def plot_bin_from_table(self, bin_number):
+        """
+        Plot 2D distributions for a specific bin from the loaded table.
+
+        :param bin_number: The bin number (row index in the table)
+        """
+        if self.table_df is None:
+            raise ValueError("Table not loaded. Use load_table() first.")
+
+        if bin_number >= len(self.table_df):
+            raise ValueError(f"Bin number {bin_number} out of range. Table has {len(self.table_df)} rows.")
+
+        columns = self.table_df.columns
+        row = self.table_df.iloc[bin_number]
+        # Find unique prefaces for _min and _max
+        prefaces_list = []
+        for col in columns:
+            if col.endswith('_min') and col[:-4] not in prefaces_list:
+                prefaces_list.append(col[:-4])  # Remove '_min'
+
+        
+        
+
+
+        if len(prefaces_list) < 2:
+            raise ValueError("Need at least two variables with _min/_max columns.")
+
+        # Mapping for variable names (e.g., Q -> Q2)
+        name_mapping = {'Q': 'Q2'}
+
+        # Create cut string based on the bin
+        # Also, get subtable cut for first two variables
+        subtable = self.table_df.copy()
+        cuts = []
+        special_bin_rect = []
+        for pref in prefaces_list[:2]:
+            mapped_name = name_mapping.get(pref, pref)
+            min_val = row[f"{pref}_min"]
+            max_val = row[f"{pref}_max"]
+            special_bin_rect.append(min_val**2)
+            special_bin_rect.append(max_val**2)
+            subtable = subtable[(subtable[f"{pref}_min"] == min_val) & (subtable[f"{pref}_max"] == max_val)]
+            cuts.append(f"{mapped_name} >= {min_val} && {mapped_name} <= {max_val}")
+
+        cut_str = " && ".join(cuts)
+        cut_str = "(" + cut_str + ") * Weight"
+        # Plot functions for plot_combo
+        plot_funcs = []
+
+        # Define function to get unique rectangles for binning
+        def _unique_rects_for(var_x, var_y, use_subtable=False):
+            rects = []
+            if use_subtable:
+                for _, r in subtable.iterrows():
+                    xmin = r[f"{var_x}_min"]
+                    xmax = r[f"{var_x}_max"]
+                    ymin = r[f"{var_y}_min"]
+                    ymax = r[f"{var_y}_max"]
+                    if (xmin, xmax, ymin, ymax) not in rects:
+                        rects.append((xmin, xmax, ymin, ymax))
+            else:
+                for _, r in self.table_df.iterrows():
+                    xmin = r[f"{var_x}_min"]
+                    xmax = r[f"{var_x}_max"]
+                    ymin = r[f"{var_y}_min"]**2 # Q--> Q2
+                    ymax = r[f"{var_y}_max"]**2 # Q--> Q2
+                    if (xmin, xmax, ymin, ymax) not in rects:
+                        rects.append((xmin, xmax, ymin, ymax))
+            return rects
+        # Print the full subtable
+        # First two variables
+        var1, var2 = prefaces_list[0], prefaces_list[1]
+        x1 = name_mapping.get(var1, var1)
+        y1 = name_mapping.get(var2, var2)
+        rects_12 = _unique_rects_for(var1, var2)
+        plot_funcs.append(lambda pad=None, x=x1, y=y1, c="Weight", rects=rects_12: self.plot_th2f(pad=pad, bin_x_name=x, bin_y_name=y, cut=c, bin_rects=rects, special_bin_rect=special_bin_rect))
+
+        # Last two variables
+        var3, var4 = prefaces_list[-2], prefaces_list[-1]
+        x2 = name_mapping.get(var3, var3)
+        y2 = name_mapping.get(var4, var4)
+        rects_34 = _unique_rects_for(var3, var4, use_subtable=True)
+        plot_funcs.append(lambda pad=None, x=x2, y=y2, c=cut_str, rects=rects_34: self.plot_th2f(pad=pad, bin_x_name=x, bin_y_name=y, cut=c, bin_rects=rects))
+
+        # Use plot_combo to display both plots
+        suptitle = f"Bin {bin_number}: {x1} vs {y1} and {x2} vs {y2}"
+        self.plot_combo(plot_funcs, ncols=2, suptitle=suptitle, output_name=f"bin_{bin_number}_plots.png")
+
+    def make_bin_plots_gif(self, output_name: str = "bin_plots.gif", duration: float = 0.2):
+        """
+        Find all files matching `bin_*_plots.png` under `out_dir` (recursively) and make an animated GIF.
+
+        :param output_name: Name of the output GIF file to write (will be placed inside out_dir)
+        :param duration: Frame duration in seconds (default 0.2 == 200ms)
+        :return: Path to the created GIF as a pathlib.Path
+        """
+        base = Path(self.data_io.get_output_dir())
+
+        if not base.exists():
+            raise FileNotFoundError(f"Output directory '{base}' does not exist")
+
+        # Find matching files recursively
+        pattern = "bin_*_plots.png"
+        # Sort files naturally to handle non-zero-padded numbers
+        import re
+        def natural_sort_key(s):
+            return [int(text) if text.isdigit() else text.lower() for text in re.split(r'(\d+)', str(s))]
+        files = sorted([p for p in base.rglob(pattern)], key=natural_sort_key)
+
+        if not files:
+            raise FileNotFoundError(f"No files matching '{pattern}' found under '{base}'")
+
+        images = [Image.open(f) for f in files]
+        out_path = base / output_name
+
+        # Save GIF using Pillow
+        images[0].save(
+            out_path,
+            save_all=True,
+            append_images=images[1:],
+            duration=int(duration * 1000),  # Convert seconds to milliseconds
+            loop=0
+        )
+
+        print(f"Created GIF with {len(images)} frames: {out_path}")
+        return out_path

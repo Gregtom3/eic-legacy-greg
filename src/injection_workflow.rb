@@ -18,7 +18,7 @@ module InjectionWorkflow
 
     # parse grid list
     grid_list = cfg[:grid].split(",").map(&:strip)
-    allowed_grids = %w[X Q Z PhPerp]
+    allowed_grids = %w[X Q Z PhPerp Mh]
     invalid = grid_list.reject { |g| allowed_grids.include?(g) }
     raise "Invalid grid values: #{invalid.join(", ")}" if invalid.any?
 
