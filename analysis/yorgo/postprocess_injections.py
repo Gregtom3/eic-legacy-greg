@@ -6,7 +6,8 @@ from postprocess import PostProcessor
 
 
 DIRECTORIES = ["analysis/yorgo/injectout/Dihadron/10x166/EarlyScience/Helium3/X",
-               "analysis/yorgo/injectout/Dihadron/10x100/EarlyScience/Proton/X"]
+               "analysis/yorgo/injectout/Dihadron/10x100/EarlyScience/Proton/X",
+               "analysis/yorgo/injectout/Dihadron/10x100/EarlyScience/Proton/X,Q,Z,Mh"]
 
 def main():
     for DIRECTORY in DIRECTORIES:

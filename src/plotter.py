@@ -447,10 +447,16 @@ class Plotter:
             mapped_name = name_mapping.get(pref, pref)
             min_val = row[f"{pref}_min"]
             max_val = row[f"{pref}_max"]
-            special_bin_rect.append(min_val**2)
-            special_bin_rect.append(max_val**2)
+            if mapped_name == "Q2":
+                special_bin_rect.append(min_val**2)
+                special_bin_rect.append(max_val**2)
+                cuts.append(f"{mapped_name} >= {min_val**2} && {mapped_name} <= {max_val**2}")
+            else:
+                special_bin_rect.append(min_val)
+                special_bin_rect.append(max_val)
+                cuts.append(f"{mapped_name} >= {min_val} && {mapped_name} <= {max_val}")
             subtable = subtable[(subtable[f"{pref}_min"] == min_val) & (subtable[f"{pref}_max"] == max_val)]
-            cuts.append(f"{mapped_name} >= {min_val} && {mapped_name} <= {max_val}")
+            
 
         cut_str = " && ".join(cuts)
         cut_str = "(" + cut_str + ") * Weight"
