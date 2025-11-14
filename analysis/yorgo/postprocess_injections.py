@@ -13,8 +13,9 @@ def main():
     for DIRECTORY in DIRECTORIES:
         processor = PostProcessor(DIRECTORY)
         processor.print()
-        processor.plot_bins()
-        processor.plot_asymmetry()
+        if "X,Q,Z,Mh" not in DIRECTORY:
+            processor.plot_bins()
+            processor.plot_asymmetry()
         processor.save_to_csv()
 
 if __name__ == "__main__":
