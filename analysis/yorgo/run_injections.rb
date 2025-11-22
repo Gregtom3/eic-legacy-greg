@@ -31,7 +31,7 @@ config = {
 run_injection_workflow(config)
 
 # Configuration Parameters
-# For the ep dihadron injections
+# For the ep dihadron injections <EARLY SCIENCE>
 config = {
   main_outdir:       "analysis/yorgo/injectout",
   file:              "out/PYTHIA8.ep_pipluspiminus___epic.25.08.0_10x100/analysis.root",
@@ -41,6 +41,26 @@ config = {
   maxEntries:        100_000_000,
   channel:           "Dihadron",
   eic_timeline:      "EarlyScience",
+  target:            "Proton",
+  grid:              "X",
+  n_injections:      1_000,
+  extract_with_true: false,
+  targetPolarization: 0.7,
+  bins_per_slurm_job: 1
+}
+
+run_injection_workflow(config)
+
+# For the ep dihadron injections <FULL>
+config = {
+  main_outdir:       "analysis/yorgo/injectout",
+  file:              "out/PYTHIA8.ep_pipluspiminus___epic.25.08.0_10x100/analysis.root",
+  tree:              "dihadron_tree",
+  energy:            "10x100",
+  table:             "analysis/yorgo/tables/x_binning_table.csv",
+  maxEntries:        100_000_000,
+  channel:           "Dihadron",
+  eic_timeline:      "Full",
   target:            "Proton",
   grid:              "X",
   n_injections:      1_000,
